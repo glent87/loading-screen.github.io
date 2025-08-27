@@ -1,27 +1,47 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>BlockLife RP - Загрузка</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlockLife RP — Загрузка</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
 </head>
 <body>
-  <canvas id="particles"></canvas>
+  <!-- фоновые эффекты -->
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <div class="ambient" aria-hidden="true"></div>
 
-  <div class="overlay">
-    <h1 class="server-name">BlockLife RP</h1>
-    <p class="loading-text">Загрузка ресурсов...</p>
+  <!-- тонкий sweep света -->
+  <div class="light-sweep" aria-hidden="true"></div>
 
-    <div class="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
-      <span id="progress-text">0%</span>
-    </div>
-
-    <div class="tips">
-      <p id="tip">Совет: Уважайте других игроков.</p>
+  <!-- декоративный центр: логотип -->
+  <div class="decor" aria-hidden="true">
+    <div class="icon">
+      <span class="hex"></span>
+      <span class="glow"></span>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- контент сверху -->
+  <main class="panel" role="main">
+    <h1 class="title">BlockLife <span class="accent">RP</span></h1>
+    <p class="subtitle">Сервер ролевого проекта — создавай истории, уважай правила</p>
+
+    <!-- PROMO: теперь справа на десктопе, центр на мобилках -->
+    <section class="promo-wrap" aria-live="polite">
+      <div class="promo" role="status">
+        <div class="promo-left">Промокод</div>
+        <div class="promo-main">!BlockLife</div>
+        <div class="promo-sub">можно получить бонус!</div>
+      </div>
+    </section>
+
+    <div class="meta">
+      <small>Подключение к серверу — приятной игры</small>
+    </div>
+  </main>
 </body>
 </html>

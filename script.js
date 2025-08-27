@@ -1,93 +1,77 @@
-// --- Динамические советы ---
-const tips = [
-  "Совет: Уважайте других игроков.",
-  "Совет: Соблюдайте правила RP.",
-  "Совет: Не используйте баги в личных целях.",
-  "Совет: Играйте честно и получайте удовольствие!"
-];
+/* script.js — только частицы на canvas (без подсказок) */
 
-let tipIndex = 0;
-const tipElement = document.getElementById("tip");
+document.addEventListener('DOMContentLoaded', () => {
 
-setInterval(() => {
-  tipIndex = (tipIndex + 1) % tips.length;
-  tipElement.textContent = tips[tipIndex];
-}, 4000);
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d', { alpha: true });
 
-// --- Зацикленный прогресс ---
-let progress = 0;
-const progressBar = document.getElementById("progress-bar");
-const progressText = document.getElementById("progress-text");
+  function fitCanvas(){
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', fitCanvas, { passive:true });
+  fitCanvas();
 
-function loopProgress() {
-  progress = 0;
-  const interval = setInterval(() => {
-    if (progress < 100) {
-      progress += 2; // шаг роста
-      progressBar.style.width = progress + "%";
-      progressText.textContent = progress + "%";
-    } else {
-      clearInterval(interval);
-      setTimeout(loopProgress, 1000); // пауза и перезапуск
+  const COUNT = Math.max(28, Math.floor(window.innerWidth / 36));
+  const particles = [];
+
+  function rnd(a,b){ return Math.random()*(b-a)+a; }
+
+  class Particle{
+    constructor(init=false){
+      this.reset(init);
     }
-  }, 100); // скорость
-}
+    reset(init=false){
+      this.x = rnd(-20, window.innerWidth + 20);
+      this.y = rnd(-20, window.innerHeight + 20);
+      this.r = rnd(0.6, 2.6);
+      this.vx = rnd(-0.25, 0.25);
+      this.vy = rnd(-0.12, 0.12);
+      this.alpha = rnd(0.06, 0.22);
+      this.life = rnd(8, 22) + (init?rnd(0,10):0);
+      this.age = 0;
+    }
+    step(dt){
+      this.x += this.vx * dt * 0.06;
+      this.y += this.vy * dt * 0.06;
+      this.age += dt * 0.01;
+      if (this.x < -40 || this.x > window.innerWidth + 40 || this.y < -40 || this.y > window.innerHeight + 40 || this.age > this.life){
+        this.reset(false);
+      }
+    }
+    draw(ctx){
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(220,230,235,${this.alpha})`;
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+      ctx.fill();
 
-loopProgress();
-
-// --- Частицы на фоне ---
-const canvas = document.getElementById("particles");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particlesArray = [];
-
-class Particle {
-  constructor() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = Math.random() * 3 + 1;
-    this.speedX = (Math.random() - 0.5) * 1.5;
-    this.speedY = (Math.random() - 0.5) * 1.5;
+      // glow
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = `rgba(86,208,214,${this.alpha*0.06})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r*4.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
   }
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
 
-    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+  for (let i=0;i<COUNT;i++) particles.push(new Particle(true));
+
+  let last = performance.now();
+  function frame(now){
+    const dt = now - last;
+    last = now;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    for (let p of particles){
+      p.step(dt);
+      p.draw(ctx);
+    }
+    requestAnimationFrame(frame);
   }
-  draw() {
-    ctx.fillStyle = "rgba(200,200,200,0.7)";
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function initParticles() {
-  particlesArray = [];
-  for (let i = 0; i < 100; i++) {
-    particlesArray.push(new Particle());
-  }
-}
-
-function animateParticles() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particlesArray.forEach(p => {
-    p.update();
-    p.draw();
-  });
-  requestAnimationFrame(animateParticles);
-}
-
-initParticles();
-animateParticles();
-
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  initParticles();
+  requestAnimationFrame(frame);
 });
